@@ -1,26 +1,52 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useEffect, useState} from 'react';
 import './App.css';
 
-function App() {
-  return (
+const App = () => {
+  const [board, setBoard] = useState(() => {
+    const defaultBoard = [];
+
+    for (var a = 0; a < 4; a++) {
+      /* add number tiles */
+      var i, j, k;
+      i = j = k = 0;
+
+      /* characters tiles */
+      while (i < 9) {
+        defaultBoard.push(`${i + 1}c`);
+        i++;
+      }
+
+      /* stone tiles */
+      while (j < 9) {
+        defaultBoard.push(`${j + 1}s`);
+        j++;
+      }
+      
+      /* bamboo tiles */
+      while (k < 9) {
+        defaultBoard.push(`${k + 1}b`);
+        k++;
+      }
+
+      /* add wind tiles */
+      defaultBoard.push('east', 'south', 'west', 'north');
+
+      /* add dragons */
+      defaultBoard.push('red', 'white', 'green');
+    }
+    
+    return defaultBoard;
+  });
+
+  useEffect( () => {
+    console.log({board});
+  })
+
+  return(
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {board}
     </div>
   );
-}
+};
 
 export default App;

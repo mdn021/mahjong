@@ -8,8 +8,9 @@ const Player = props => {
             <h1>{props.name}</h1>
             <div className={style.tile}>
                 {props.player.map((tile, index) => {
+                    var tileSplit = tile.split("-");
                     return (
-                        <Tile key={index} tile={tile}/>
+                        <Tile key={index} tile={tileSplit[1]}/>
                     )
                 })}
             </div>

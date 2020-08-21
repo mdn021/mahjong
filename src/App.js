@@ -16,27 +16,27 @@ const App = () => {
 
       /* characters tiles */
       while (i < 9) {
-        defaultBoard.push(`c${i + 1}`);
+        defaultBoard.push(`0${i + 1}-c${i + 1}`);
         i++;
       }
 
       /* stone tiles */
       while (j < 9) {
-        defaultBoard.push(`s${j + 1}`);
+        defaultBoard.push(`${9 + j + 1}-s${j + 1}`);
         j++;
       }
 
       /* bamboo tiles */
       while (k < 9) {
-        defaultBoard.push(`b${k + 1}`);
+        defaultBoard.push(`${18 + k + 1}-b${k + 1}`);
         k++;
       }
 
       /* add wind tiles */
-      defaultBoard.push('east', 'south', 'west', 'north');
+      defaultBoard.push('28-east', '29-south', '30-west', '31-north');
 
       /* add dragons */
-      defaultBoard.push('red', 'white', 'green');
+      defaultBoard.push('32-red', '33-white', '34-green');
     }
   })();
   
@@ -72,17 +72,17 @@ const App = () => {
       player1Tiles.push(board[16+i]);
       player1Tiles.push(board[32+i]);
       /* player 2 */
-      player2Tiles.push(board[i+1]);
-      player2Tiles.push(board[17+i]);
-      player2Tiles.push(board[33+i]);
+      player2Tiles.push(board[i+4]);
+      player2Tiles.push(board[20+i]);
+      player2Tiles.push(board[36+i]);
       /* player 3 */
-      player3Tiles.push(board[i]);
-      player3Tiles.push(board[18+i]);
-      player3Tiles.push(board[34+i]);
+      player3Tiles.push(board[i+8]);
+      player3Tiles.push(board[24+i]);
+      player3Tiles.push(board[40+i]);
       /* player 4 */
-      player4Tiles.push(board[i]);
-      player4Tiles.push(board[19+i]);
-      player4Tiles.push(board[35+i]);
+      player4Tiles.push(board[i+12]);
+      player4Tiles.push(board[28+i]);
+      player4Tiles.push(board[44+i]);
     }
 
     /* final tile */
@@ -90,6 +90,8 @@ const App = () => {
     player2Tiles.push(board[49]);
     player3Tiles.push(board[50]);
     player4Tiles.push(board[51]);
+    
+    console.log(player1Tiles.toString())
 
     setPlayers({
       player1: player1Tiles.sort(),

@@ -41,6 +41,7 @@ const App = () => {
   })();
   
   const [board, setBoard] = useState(defaultBoard);
+  const [diceRoll, setDice] = useState(0);
   const [players, setPlayers] = useState({
     player1: [],
     player2: [],
@@ -57,42 +58,82 @@ const App = () => {
     console.log(newBoard);
   };
 
+  const rollDice = () => {
+    const dice1 = Math.floor(Math.random() * 6) + 1;
+    const dice2 = Math.floor(Math.random() * 6) + 1;
+
+    const sumDiceRoll = dice1 + dice2;
+    setDice(sumDiceRoll);
+    return sumDiceRoll;
+  };
+
+  const findDistributeStart = () => {
+    const sum = rollDice();
+    console.log(sum);
+    const mod = sum % 4;
+    var start = 0;
+    switch (mod) {
+      case 1:
+        start = 0;
+        break;
+      case 2:
+        start = 17;
+        break;
+      case 3:
+        start = 34;
+        break;
+      case 4:
+        start = 51;
+        break;
+      default:
+        start = 0;
+        break;
+    }
+
+    return start + sum;
+  };
+
   const distribute = () => {
     console.log('distributing tiles');
-    /* for player 1 */
+
+
+    const start = findDistributeStart();
+    console.log(start);
+    const firstSplit = board.slice(start, board.length);
+    const secondSplit = board.slice(0, start);
+    const newBoard = firstSplit.concat(secondSplit);
+    setBoard(newBoard);
+
     var player1Tiles = []; 
     var player2Tiles = []; 
     var player3Tiles = []; 
-    var player4Tiles = [];
-    
+    var player4Tiles = [];    
 
     for (var i = 0; i < 4; i++) {
       /* player 1 */
-      player1Tiles.push(board[i]);
-      player1Tiles.push(board[16+i]);
-      player1Tiles.push(board[32+i]);
+      player1Tiles.push(newBoard[i]);
+      player1Tiles.push(newBoard[16+i]);
+      player1Tiles.push(newBoard[32+i]);
       /* player 2 */
-      player2Tiles.push(board[i+4]);
-      player2Tiles.push(board[20+i]);
-      player2Tiles.push(board[36+i]);
+      player2Tiles.push(newBoard[i+4]);
+      player2Tiles.push(newBoard[20+i]);
+      player2Tiles.push(newBoard[36+i]);
       /* player 3 */
-      player3Tiles.push(board[i+8]);
-      player3Tiles.push(board[24+i]);
-      player3Tiles.push(board[40+i]);
+      player3Tiles.push(newBoard[i+8]);
+      player3Tiles.push(newBoard[24+i]);
+      player3Tiles.push(newBoard[40+i]);
       /* player 4 */
-      player4Tiles.push(board[i+12]);
-      player4Tiles.push(board[28+i]);
-      player4Tiles.push(board[44+i]);
+      player4Tiles.push(newBoard[i+12]);
+      player4Tiles.push(newBoard[28+i]);
+      player4Tiles.push(newBoard[44+i]);
     }
 
     /* final tile */
-    player1Tiles.push(board[48]);
-    player2Tiles.push(board[49]);
-    player3Tiles.push(board[50]);
-    player4Tiles.push(board[51]);
+    player1Tiles.push(newBoard[48]);
+    player2Tiles.push(newBoard[49]);
+    player3Tiles.push(newBoard[50]);
+    player4Tiles.push(newBoard[51]);
     
-    console.log(player1Tiles.toString())
-
     setPlayers({
       player1: player1Tiles.sort(),
       player2: player2Tiles.sort(),
@@ -108,7 +149,7 @@ const App = () => {
       <Player name="Player 2" player={players.player2} />
       <Player name="Player 3" player={players.player3} />
       <Player name="Player 4" player={players.player4} />
-
+      <h1>{diceRoll}</h1>
       <button onClick={distribute}>Distribute Tiles</button>
     </div>
   );

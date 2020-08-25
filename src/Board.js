@@ -28,12 +28,12 @@ const Board = (props) => {
 
     return (
         <div className={style.board}>
+            <button onClick={shuffle}>Randomize Board</button>
             {props.board.map((tile, index) => {
                 return (
                     <Tile key={index} tile={tile} />
                 )
             })}
-            <button onClick={shuffle}>randomize</button>
         </div>
     )
 };

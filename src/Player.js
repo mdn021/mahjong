@@ -3,14 +3,23 @@ import Tile from './Tile';
 import style from './player.module.css';
 
 const Player = props => {
+    const discard = tile => {
+        console.log(tile);
+        const newHand = props.hand;
+        const index = newHand.indexOf(tile);
+        if (index !== -1){
+            newHand.splice(index, 1);
+        }
+        props.onClick(props.index, newHand);
+    };
+
     return (
         <div className={style.player}>
             <h1>{props.name}</h1>
             <div className={style.tile}>
-                {props.player.map((tile, index) => {
-                    var tileSplit = tile.split("-");
+                {props.hand.map((tile, index) => {
                     return (
-                        <Tile key={index} tile={tileSplit[1]}/>
+                        <Tile key={index} tile={tile} player={props.name} onClick={discard}/>
                     )
                 })}
             </div>

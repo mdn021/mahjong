@@ -185,6 +185,7 @@ const App = () => {
   const isHandWinning = (hand, pairFound = false) => {
     console.log(`checking if ${hand} is winning`);
     const currHand = [...hand];
+    var remainder = [...hand];
 
     if (!currHand.length) {
       console.log("YOU WIN!");
@@ -192,64 +193,83 @@ const App = () => {
     }
 
     const tile = currHand.pop();
+    
     console.log(`Pre-check: ${currHand}`);
-    if (hasPon(tile, currHand)) {
-      console.log(`Post-Pon: ${currHand}`);
-      if (isHandWinning(currHand)) {
+    if (hasPon(tile, currHand, remainder)) {
+      console.log(`Post-Pon: ${remainder}`);
+      if (isHandWinning(remainder)) {
         return true;
+      } else {
+        remainder = [...hand];
       }
     } 
-    if (hasChi(tile, currHand)) {
-      console.log(`Post-Chi: ${currHand}`);
-      if (isHandWinning(currHand)) {
+    if (hasChi(tile, currHand, remainder)) {
+      console.log(`Post-Chi: ${remainder}`);
+      if (isHandWinning(remainder)) {
         return true;
+      } else {
+        remainder = [...hand];
       }
     } 
-    if (hasPair(tile, currHand, pairFound)) {
-      console.log(`Post-Pair: ${currHand}`);
-      if (isHandWinning(currHand)) {
+    if (hasPair(tile, currHand, remainder, pairFound)) {
+      console.log(`Post-Pair: ${remainder}`);
+      if (isHandWinning(remainder)) {
         return true;
+      } else {
+        remainder = [...hand];
       }
     }
 
     return false;
   };
 
-  const hasPon = (tile, handChunk) => {
+  const hasPon = (tile, handChunk, remainder) => {
     var newArray = handChunk.filter( value => value === tile );
-    if (newArray.length === 2) {
+    if (newArray.length >= 2) {
       console.log(`${tile} can be part of a pon!`);
-      const index = handChunk.indexOf(tile);
-      handChunk.splice(index, 2);
+      const index = remainder.indexOf(tile);
+      remainder.splice(index, 3);
       return true;
     }
     
     return false;
   };
 
-  const hasChi = (tile, handChunk) => {
+  const hasChi = (tile, handChunk, remainder) => {
     /* check if tile is character, stone, or bamboo */
     if (tile >= 1 && tile <= 29) {
       // 6 -> 4 5 6 | 5 6 7 | 6 7 8
 
-      if (handChunk.includes(tile-2) && handChunk.includes(tile-1)) {
+      if (handChunk.includes(tile - 2) && handChunk.includes(tile - 1)) {
         console.log(`${tile} can be part of a chi! -2 -1`);
-        const index = handChunk.indexOf(tile - 2);
-        handChunk.splice(index, 2);
+        const indexTileMinus2 = remainder.indexOf(tile - 2);
+        remainder.splice(indexTileMinus2, 1);
+        const indexTileMinus1 = remainder.indexOf(tile - 1);
+        remainder.splice(indexTileMinus1, 1);
+        const indexTile = remainder.indexOf(tile);
+        remainder.splice(indexTile, 1);
         return true;
       }
 
-      if (handChunk.includes(tile-1) && handChunk.includes(tile+1)) {
+      if (handChunk.includes(tile - 1) && handChunk.includes(tile + 1)) {
         console.log(`${tile} can be part of a chi! -1 +1`);
-        const index = handChunk.indexOf(tile - 1);
-        handChunk.splice(index, 2);
+        const indexTileMinus1 = remainder.indexOf(tile - 1);
+        remainder.splice(indexTileMinus1, 1);
+        const indexTile = remainder.indexOf(tile);
+        remainder.splice(indexTile, 1);
+        const indexTilePlus1 = remainder.indexOf(tile + 1);
+        remainder.splice(indexTilePlus1, 1);
         return true;
       }
 
-      if (handChunk.includes(tile+1) && handChunk.includes(tile+2)) {
+      if (handChunk.includes(tile + 1) && handChunk.includes(tile + 2)) {
         console.log(`${tile} can be part of a chi! +1 +2`);
-        const index = handChunk.indexOf(tile + 1);
-        handChunk.splice(index, 2);
+        const indexTile = remainder.indexOf(tile);
+        remainder.splice(indexTile, 1);
+        const indexTilePlus1 = remainder.indexOf(tile + 1);
+        remainder.splice(indexTilePlus1, 1);
+        const indexTilePlus2 = remainder.indexOf(tile + 2);
+        remainder.splice(indexTilePlus2, 1);
         return true;
       }
 
@@ -257,21 +277,23 @@ const App = () => {
     }
   };
 
-  const hasPair = (tile, handChunk, pairFound) => {
+  const hasPair = (tile, handChunk, remainder, pairFound) => {
     if (pairFound) {
       /* pair already exists */
       return false;
     }
 
     var newArray = handChunk.filter(value => value === tile);
+    
     if (newArray.length === 1) {
       console.log(`${tile} can be part of a pair!`);
       pairFound = true;
-      const index = handChunk.indexOf(tile);
-      handChunk.splice(index, 1);
+      const index = remainder.indexOf(tile);
+      remainder.splice(index, 2);
       return true;
     }
 
+    console.log(`${tile} is not part of anything`);
     return false;
   };
 
@@ -330,8 +352,16 @@ const App = () => {
   };
 
   const checkWinningHand = () => {
-    const winningHands = [1,1,1,2,2,2,3,3,3,4,4,4,5,5];
-    isHandWinning(winningHands);
+    const hand1 = [1,2,3,4,4,5,6,7,8,8,8,9,9,9];
+    const hand2 = [1,2,3,3,3,5,6,7,8,8,8,9,9,9];
+    const hand3 = [1,2,3,3,3,3,5,6,7,8,8,8,9,9];
+    const hand4 = [1,2,3,4,5,5,6,7,8,8,8,9,9,9];
+    const hand5 = [1,2,3,3,4,5,5,5,6,6,6,7,8,9];
+    // console.log(`${hand1} should be winning: RESULTS:${isHandWinning(hand1)}`);
+    // console.log(`${hand2} should be winning: RESULTS:${isHandWinning(hand2)}`);
+    // console.log(`${hand3} should be winning: RESULTS:${isHandWinning(hand3)}`);
+    // console.log(`${hand4} should NOT be winning: RESULTS:${isHandWinning(hand4)}`);
+    console.log(`${hand5} should be winning: RESULTS:${isHandWinning(hand5)}`);
   }
 
   return(

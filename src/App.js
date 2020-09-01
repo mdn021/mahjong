@@ -5,45 +5,28 @@ import './App.css';
 
 const App = () => {
 
+  /* set up default board */
   var defaultBoard = [];
-
-  /* setting up default board */
-  // (() => {
-  //   for (var a = 0; a < 4; a++) {
-  //     /* add number tiles */
-  //     var i, j, k;
-  //     i = j = k = 0;
-
-  //     /* characters tiles */
-  //     while (i < 9) {
-  //       defaultBoard.push(`0${i + 1}-c${i + 1}`);
-  //       i++;
-  //     }
-
-  //     /* stone tiles */
-  //     while (j < 9) {
-  //       defaultBoard.push(`${9 + j + 1}-s${j + 1}`);
-  //       j++;
-  //     }
-
-  //     /* bamboo tiles */
-  //     while (k < 9) {
-  //       defaultBoard.push(`${18 + k + 1}-b${k + 1}`);
-  //       k++;
-  //     }
-
-  //     /* add wind tiles */
-  //     defaultBoard.push('28-east', '29-south', '30-west', '31-north');
-
-  //     /* add dragons */
-  //     defaultBoard.push('32-red', '33-white', '34-green');
-  //   }
-  // })();
-
   (() => {
     for (var a = 0; a < 4; a++) {
-      for (var i = 1; i <= 34; i++) {
+      for (var i = 1; i <= 9; i++) {
         defaultBoard.push(i);
+      }
+
+      for (var j = 11; j <= 19; j++) {
+        defaultBoard.push(j);
+      }
+
+      for (var k = 21; k <= 29; k++) {
+        defaultBoard.push(k);
+      }
+
+      for (var l = 31; l <= 34; l++) {
+        defaultBoard.push(l);
+      }
+
+      for (var m = 41; m <= 43; m++) {
+        defaultBoard.push(m);
       }
     }
   })();
@@ -58,15 +41,39 @@ const App = () => {
   });
   const [gameState, setGameState] = useState({
     started: false,
-    currPlayer: "player1",
+    currPlayer: "none",
     currTile: 0,
     realPlayers: ["player1"],
     CPUPlayers: ["player2", "player3", "player4"]
   });
 
   useEffect(() => {
-    // console.log(board);
-  });
+    if (!gameState.started) {
+      return;
+    }
+
+    drawTile();
+
+    if (gameState.CPUPlayers.includes(gameState.currPlayer)) {
+      // TODO: Check if CPU somehow has a winning hand 
+      // Add function call here
+
+      var currentHands = { ...players };
+      
+      // console.log(`Pre-pop: ${JSON.stringify(currentHands)}`);
+      currentHands[gameState.currPlayer].pop();
+      // console.log(`Post-pop: ${JSON.stringify(currentHands)}`);
+
+      /* get the next player, draw the next tile, update next players hand */
+      const nextPlayer = findNextPlayer(gameState.currPlayer);
+
+      setPlayers(currentHands);
+
+      /* update the game state */
+      const nextTile = gameState.currTile + 1;
+      updateGameState(nextPlayer, nextTile);
+    }
+  }, [gameState.currPlayer]);
 
   const shuffle = newBoard => {
     setBoard(newBoard);
@@ -83,7 +90,6 @@ const App = () => {
 
   const findDistributeStart = () => {
     const sum = rollDice();
-    console.log(sum);
     const mod = sum % 4;
     var start = 0;
     switch (mod) {
@@ -145,11 +151,6 @@ const App = () => {
     player2Tiles.push(newBoard[49]);
     player3Tiles.push(newBoard[50]);
     player4Tiles.push(newBoard[51]);
-
-    /* player 1's draw tile */
-    player1Tiles.push(newBoard[52]);
-
-    console.log(player1Tiles.sort((a, b) => { return a - b }));
     
     setPlayers({
       player1: player1Tiles.sort(compareTilePriority),
@@ -158,32 +159,148 @@ const App = () => {
       player4: player4Tiles.sort(compareTilePriority)
     });
 
-    updateGameState(true, gameState.currPlayer, 53);
+    updateGameState("player1", 52, true);
   };
 
   const compareTilePriority = (a, b) => {
     return a - b;
-  }
+  };
 
-  const updateHand = (player, newHand) => {
+  const drawTile = () => {
+    console.log(`drawing tile for ${gameState.currPlayer}`);
+
+    const currPlayer = gameState.currPlayer;
+    const currTile = gameState.currTile;
+
+    var currentPlayersHand = players[currPlayer];
+
+    currentPlayersHand.push(board[currTile]);
+
+    // check if winning hand
+    isHandWinning(currentPlayersHand);
+    
+    updateHand(currPlayer, currentPlayersHand, "draw");
+  };
+
+  const isHandWinning = (hand, pairFound = false) => {
+    console.log(`checking if ${hand} is winning`);
+    const currHand = [...hand];
+
+    if (!currHand.length) {
+      console.log("YOU WIN!");
+      return true;
+    }
+
+    const tile = currHand.pop();
+    console.log(`Pre-check: ${currHand}`);
+    if (hasPon(tile, currHand)) {
+      console.log(`Post-Pon: ${currHand}`);
+      if (isHandWinning(currHand)) {
+        return true;
+      }
+    } 
+    if (hasChi(tile, currHand)) {
+      console.log(`Post-Chi: ${currHand}`);
+      if (isHandWinning(currHand)) {
+        return true;
+      }
+    } 
+    if (hasPair(tile, currHand, pairFound)) {
+      console.log(`Post-Pair: ${currHand}`);
+      if (isHandWinning(currHand)) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  const hasPon = (tile, handChunk) => {
+    var newArray = handChunk.filter( value => value === tile );
+    if (newArray.length === 2) {
+      console.log(`${tile} can be part of a pon!`);
+      const index = handChunk.indexOf(tile);
+      handChunk.splice(index, 2);
+      return true;
+    }
+    
+    return false;
+  };
+
+  const hasChi = (tile, handChunk) => {
+    /* check if tile is character, stone, or bamboo */
+    if (tile >= 1 && tile <= 29) {
+      // 6 -> 4 5 6 | 5 6 7 | 6 7 8
+
+      if (handChunk.includes(tile-2) && handChunk.includes(tile-1)) {
+        console.log(`${tile} can be part of a chi! -2 -1`);
+        const index = handChunk.indexOf(tile - 2);
+        handChunk.splice(index, 2);
+        return true;
+      }
+
+      if (handChunk.includes(tile-1) && handChunk.includes(tile+1)) {
+        console.log(`${tile} can be part of a chi! -1 +1`);
+        const index = handChunk.indexOf(tile - 1);
+        handChunk.splice(index, 2);
+        return true;
+      }
+
+      if (handChunk.includes(tile+1) && handChunk.includes(tile+2)) {
+        console.log(`${tile} can be part of a chi! +1 +2`);
+        const index = handChunk.indexOf(tile + 1);
+        handChunk.splice(index, 2);
+        return true;
+      }
+
+      return false;
+    }
+  };
+
+  const hasPair = (tile, handChunk, pairFound) => {
+    if (pairFound) {
+      /* pair already exists */
+      return false;
+    }
+
+    var newArray = handChunk.filter(value => value === tile);
+    if (newArray.length === 1) {
+      console.log(`${tile} can be part of a pair!`);
+      pairFound = true;
+      const index = handChunk.indexOf(tile);
+      handChunk.splice(index, 1);
+      return true;
+    }
+
+    return false;
+  };
+
+  const updateHand = (player, newHand, action) => {
+
+    // TODO: need to remove this when Pon and Chi are implemented
     if (gameState.currPlayer !== player) {
       console.log(`Currently ${gameState.currPlayer}'s turn.`);
       return;
     }
 
-    /* update the current players hand with the discarded tile removed */
+    /* update the current players hand */
     var currentHands = {...players};
-    currentHands[player] = newHand;
+
+    if (action === "discard") {
+      /* resort the hand */
+      currentHands[player] = newHand.sort(compareTilePriority);
+
+      /* get the next player, draw the next tile, update next players hand */
+      const nextPlayer = findNextPlayer(player);
+
+      /* update the game state */
+      const nextTile = gameState.currTile + 1;
+      updateGameState(nextPlayer, nextTile);
+    }
     
-    /* get the next player, draw the next tile, update next players hand */
-    const nextPlayer = findNextPlayer(player);
-    currentHands[nextPlayer].push(board[gameState.currTile]);
     
     setPlayers(currentHands);
     
-    /* update the game state */
-    const nextTile = gameState.currTile + 1;
-    updateGameState(gameState.started, nextPlayer, nextTile);
   };
 
   const findNextPlayer = currPlayer => {
@@ -201,7 +318,7 @@ const App = () => {
     }
   };
 
-  const updateGameState = (started, player, tileIndex) => {
+  const updateGameState = (player, tileIndex, started = gameState.started) => {
     console.log(`updating currPlayer to ${player}`);
     setGameState({
       started: started,
@@ -210,6 +327,11 @@ const App = () => {
       realPlayers: gameState.realPlayers,
       CPUPlayers: gameState.CPUPlayers
     });
+  };
+
+  const checkWinningHand = () => {
+    const winningHands = [1,1,1,2,2,2,3,3,3,4,4,4,5,5];
+    isHandWinning(winningHands);
   }
 
   return(
@@ -221,6 +343,8 @@ const App = () => {
       <Player name="Player 2" index="player2" hand={players.player2} onClick={updateHand}/>
       <Player name="Player 3" index="player3" hand={players.player3} onClick={updateHand}/>
       <Player name="Player 4" index="player4" hand={players.player4} onClick={updateHand}/>
+
+      <button onClick={checkWinningHand}>Debug</button>
     </div>
   );
 };

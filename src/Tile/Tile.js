@@ -1,6 +1,6 @@
 import React from 'react';
 import style from './tile.module.css';
-import {TileMap, TileImgMap} from './Constants';
+import {TileMap, TileImgMap} from '../Constants';
 
 const Tile = (props) => {
 
